@@ -8,18 +8,23 @@ from watchdog.events import FileSystemEventHandler
 
 today = datetime.date.today()
 
-# define dir to be watched and root dir for os
+### DEFINE start
+
 # root dir (place this script in it)
 win_rootdir = "C:\\___d___\\_python\\pyfilewatcher\\"
 lin_rootdir = "/home/d/python/pyfilewatcher/"
-# folder to be watched (relative to above)
-dir_to_watch = "watchme"
+# folder to be watched
+win_dir_to_watch = "C:\\test\\watchme\\"
+lin_dir_to_watch = "/home/d/watchme/"
+# copy destination
+win_new_destination = "C:\\test\\NEW_DEST\\"
+lin_new_destination = "/home/d/NEW_DEST/"
 
-'''
+### DEFINE end
 
-python3 watchdog.py -r <rootdir> -d <dir_to_watch> -n <new destination>
+### python3 watchdog.py -r <rootdir> -d <dir_to_watch> -n <new destination>
 
-'''
+
 
 class Watcher:
     
@@ -57,10 +62,9 @@ class Handler(FileSystemEventHandler):
             except:
                 pass
             logging.info('new item created: %s ' % event.src_path)
-            subdiron = (event.src_path).split(separator,1)[1]
             inthedir = separator.join(event.src_path.split(separator)[1:-1])
-            Helper.copy_all(rootdir + dir_to_watch + separator + subdiron, new_destination + inthedir)
-            logging.info(rootdir + dir_to_watch + separator + subdiron + ' copied to: ' + new_destination + inthedir)
+            Helper.copy_all(event.src_path , new_destination + inthedir)
+            logging.info(event.src_path + ' copied to: ' + new_destination + inthedir)
 
 
         elif event.event_type == 'modified':
@@ -70,10 +74,9 @@ class Handler(FileSystemEventHandler):
             except:
                 pass
             logging.info('item modified: %s ' % event.src_path)
-            subdiron = (event.src_path).split(separator,1)[1]
             inthedir = separator.join(event.src_path.split(separator)[1:-1])
-            Helper.copy_all(rootdir + dir_to_watch + separator + subdiron, new_destination + inthedir)
-            logging.info(rootdir + dir_to_watch + separator + subdiron + ' copied to: ' + new_destination + inthedir)
+            Helper.copy_all(event.src_path , new_destination + inthedir)
+            logging.info(event.src_path + ' copied to: ' + new_destination + inthedir)
 
         elif event.event_type == 'deleted':
             # Taken any action here when a file is deleted.
@@ -113,8 +116,7 @@ class Helper:
         print('')
         print('*** WATCHDOG.PY ***')
         print ('-- USAGE: watchdog.py [-r <rootdir>] [-d <dir_to_watch>] [-n <new_destination>]')
-        print('   // rootdir = absolute path, no quotation marks')
-        print('   // dir_to_watch and new_destination = paths relative to rootdir')
+        print('   // for dirs provide absolute path, no quotation marks')
         print('-- if arguments not specified - defaults from script taken')
         print('')
 
@@ -127,12 +129,16 @@ class Helper:
 
         if platform.system() == "Windows":
             rootdir = win_rootdir
-            separator = win_sep     
+            separator = win_sep   
+            dir_to_watch = win_dir_to_watch + separator
+            new_destination = win_new_destination + separator
         elif platform.system() == "Linux":
             rootdir = lin_rootdir
             separator = lin_sep
-        new_destination = rootdir + "DEST_NEW" + separator
-        dir_to_watch = "watchme" + separator
+            dir_to_watch = lin_dir_to_watch + separator
+            new_destination = lin_new_destination + separator
+        else:
+            print("Your system was not detected. You have to specify folder paths in scripts.")
         return rootdir, new_destination, separator, dir_to_watch
 
     def check_py_ver(self):
